@@ -10,6 +10,7 @@ from datetime import datetime
 from models.mongo import get_db
 from config import Config
 from bson import ObjectId
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,12 @@ def get_openai_client():
     """Get OpenAI client instance"""
     global _openai_client
     if _openai_client is None:
-        _openai_client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        # Create httpx client without proxies to avoid compatibility issues
+        http_client = httpx.Client(timeout=60.0)
+        _openai_client = openai.OpenAI(
+            api_key=Config.OPENAI_API_KEY,
+            http_client=http_client
+        )
     return _openai_client
 
 def embed_text(text: str) -> List[float]:

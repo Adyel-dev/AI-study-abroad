@@ -8,6 +8,7 @@ import requests
 import logging
 from typing import List, Dict, Any, Optional
 from config import Config
+import httpx
 
 logger = logging.getLogger(__name__)
 
@@ -19,9 +20,12 @@ def get_openrouter_client():
     """Get OpenRouter client instance"""
     global _openrouter_client
     if _openrouter_client is None:
+        # Create httpx client without proxies to avoid compatibility issues
+        http_client = httpx.Client(timeout=60.0)
         _openrouter_client = openai.OpenAI(
             base_url="https://openrouter.ai/api/v1",
-            api_key=Config.OPENROUTER_API_KEY
+            api_key=Config.OPENROUTER_API_KEY,
+            http_client=http_client
         )
     return _openrouter_client
 
@@ -29,7 +33,12 @@ def get_openai_client():
     """Get OpenAI client instance (fallback)"""
     global _openai_client
     if _openai_client is None:
-        _openai_client = openai.OpenAI(api_key=Config.OPENAI_API_KEY)
+        # Create httpx client without proxies to avoid compatibility issues
+        http_client = httpx.Client(timeout=60.0)
+        _openai_client = openai.OpenAI(
+            api_key=Config.OPENAI_API_KEY,
+            http_client=http_client
+        )
     return _openai_client
 
 def chat_completion(
