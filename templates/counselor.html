@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}AI Counselor - Study in Germany{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/counselor.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div class="p-3 rounded-circle me-3" style="background: rgba(118, 75, 162, 0.2);">
+        <i class="bi bi-robot fs-2" style="color: var(--accent-secondary);"></i>
+    </div>
+    <div>
+        <h1 class="mb-0">AI Counselor</h1>
+        <p class="text-muted mb-0">Get personalized guidance for your study journey in Germany</p>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-9">
+        <div class="card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center flex-wrap gap-2">
+                <h5 class="mb-0">
+                    <i class="bi bi-robot me-2"></i>AI Counselor Chat
+                </h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <select class="form-select form-select-sm" id="sessionSelect" onchange="loadSession()" style="min-width: 150px;">
+                        <option value="">Select Session...</option>
+                    </select>
+                    <button class="btn btn-sm btn-primary" onclick="createNewSession()">
+                        <i class="bi bi-plus-circle me-1"></i> New Session
+                    </button>
+                </div>
+            </div>
+            <div class="card-body p-0 d-flex flex-column" style="min-height: 600px;">
+                <div id="chatContainer" class="chat-container flex-grow-1"></div>
+                <div class="card-footer border-top">
+                    <form id="messageForm" onsubmit="sendMessage(event)">
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="messageInput" placeholder="Type your message..." required>
+                            <button class="btn btn-primary" type="submit">
+                                <i class="bi bi-send me-1"></i> Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-person-circle me-2"></i>Profile Summary
+                </h6>
+            </div>
+            <div class="card-body" id="profileSummary">
+                <p class="text-muted small mb-0">No profile data available</p>
+            </div>
+        </div>
+        <div class="card mb-3">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-graph-up me-2"></i>Latest Assessment
+                </h6>
+            </div>
+            <div class="card-body" id="assessmentSummary">
+                <p class="text-muted small mb-0">No assessment available</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="bi bi-list-check me-2"></i>Action Plan
+                </h6>
+            </div>
+            <div class="card-body" id="actionPlan" style="max-height: 300px; overflow-y: auto;">
+                <p class="text-muted small mb-0">No action plan available</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

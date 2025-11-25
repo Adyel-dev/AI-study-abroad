@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: study-germany-ai-counselor
+    env: python
+    plan: starter
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:create_app() --bind 0.0.0.0:$PORT
+    envVars:
+      - key: MONGODB_URI
+        sync: false
+      - key: DB_NAME
+        value: study_germany_db
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: ENABLE_SCHEDULER
+        value: true
+    disk:
+      name: uploads-disk
+      mountPath: /opt/render/project/src/uploads
+      sizeGB: 1
+

@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Study in Germany AI Counselor{% endblock %}
+
+{% block content %}
+<div class="hero-section text-center">
+    <div class="container">
+        <h1>Plan Your Studies in Germany with an AI Counselor</h1>
+        <p class="lead">Discover universities, find programmes, understand immigration requirements, and get personalized guidance</p>
+        <div class="mt-4">
+            <a href="{{ url_for('universities_page') }}" class="btn btn-light btn-lg me-2 mb-2">
+                <i class="bi bi-building me-2"></i> Browse Universities
+            </a>
+            <a href="{{ url_for('programmes_page') }}" class="btn btn-outline-light btn-lg me-2 mb-2">
+                <i class="bi bi-book me-2"></i> Find Programmes
+            </a>
+            <a href="{{ url_for('counselor_page') }}" class="btn btn-outline-light btn-lg mb-2">
+                <i class="bi bi-chat-dots me-2"></i> Talk to AI Counselor
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-5 g-4">
+    <div class="col-md-4">
+        <div class="card text-center h-100 university-card">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <div class="d-inline-block p-3 rounded-circle" style="background: rgba(102, 126, 234, 0.2);">
+                        <i class="bi bi-building fs-1" style="color: var(--accent-primary);"></i>
+                    </div>
+                </div>
+                <h5 class="card-title">Search Universities</h5>
+                <p class="card-text flex-grow-1">Explore German universities by state, search by name, and discover programmes offered.</p>
+                <a href="{{ url_for('universities_page') }}" class="btn btn-primary mt-auto">
+                    <i class="bi bi-arrow-right me-1"></i> Browse Universities
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100 programme-card">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <div class="d-inline-block p-3 rounded-circle" style="background: rgba(74, 222, 128, 0.2);">
+                        <i class="bi bi-book fs-1" style="color: var(--success-color);"></i>
+                    </div>
+                </div>
+                <h5 class="card-title">Find Programmes</h5>
+                <p class="card-text flex-grow-1">Search for study programmes by degree type, language, field, and location.</p>
+                <a href="{{ url_for('programmes_page') }}" class="btn btn-success mt-auto">
+                    <i class="bi bi-arrow-right me-1"></i> Find Programmes
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="mb-3">
+                    <div class="d-inline-block p-3 rounded-circle" style="background: rgba(251, 191, 36, 0.2);">
+                        <i class="bi bi-shield-check fs-1" style="color: var(--warning-color);"></i>
+                    </div>
+                </div>
+                <h5 class="card-title">Immigration Helper</h5>
+                <p class="card-text flex-grow-1">Get personalized visa and residence permit advice based on your situation.</p>
+                <a href="{{ url_for('immigration_page') }}" class="btn btn-warning mt-auto">
+                    <i class="bi bi-arrow-right me-1"></i> Get Advice
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4 g-4">
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 rounded me-3" style="background: rgba(102, 126, 234, 0.2);">
+                        <i class="bi bi-person-circle fs-3" style="color: var(--accent-primary);"></i>
+                    </div>
+                    <h5 class="card-title mb-0">Create Your Profile</h5>
+                </div>
+                <p class="card-text flex-grow-1">Build your student profile, upload documents, and get a personalized feasibility assessment.</p>
+                <a href="{{ url_for('profile_page') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-person-plus me-1"></i> Create Profile
+                </a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body d-flex flex-column">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="p-2 rounded me-3" style="background: rgba(118, 75, 162, 0.2);">
+                        <i class="bi bi-robot fs-3" style="color: var(--accent-secondary);"></i>
+                    </div>
+                    <h5 class="card-title mb-0">AI Counselor</h5>
+                </div>
+                <p class="card-text flex-grow-1">Chat with our AI counselor to get personalized guidance, create action plans, and track your progress.</p>
+                <a href="{{ url_for('counselor_page') }}" class="btn btn-outline-primary">
+                    <i class="bi bi-chat-left-dots me-1"></i> Start Counseling
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="alert alert-info mt-5" role="alert">
+    <div class="d-flex align-items-start">
+        <div class="me-3">
+            <i class="bi bi-info-circle fs-2"></i>
+        </div>
+        <div class="flex-grow-1">
+            <h5 class="alert-heading mb-3">Getting Started</h5>
+            <p class="mb-2">New to the platform? Follow these steps:</p>
+            <ol class="mb-0 ps-3">
+                <li class="mb-2">Create your student profile with your background and goals</li>
+                <li class="mb-2">Upload your educational documents (transcripts, certificates, etc.)</li>
+                <li class="mb-2">Run a feasibility assessment to see how ready you are</li>
+                <li class="mb-2">Explore universities and programmes</li>
+                <li>Chat with the AI counselor for personalized guidance</li>
+            </ol>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

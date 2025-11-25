@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}Immigration Helper - Study in Germany{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/immigration.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div class="p-3 rounded-circle me-3" style="background: rgba(251, 191, 36, 0.2);">
+        <i class="bi bi-shield-check fs-2" style="color: var(--warning-color);"></i>
+    </div>
+    <div>
+        <h1 class="mb-0">Immigration Helper</h1>
+        <p class="text-muted mb-0">Get personalized visa and residence permit guidance</p>
+    </div>
+</div>
+
+<div class="alert alert-warning" role="alert">
+    <div class="d-flex align-items-start">
+        <i class="bi bi-exclamation-triangle fs-4 me-3"></i>
+        <div>
+            <strong>Disclaimer:</strong> 
+            This is informational only and not legal advice. Always confirm with official embassies/authorities.
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <h5 class="mb-0">
+            <i class="bi bi-magic me-2"></i>Visa & Residence Permit Wizard
+        </h5>
+    </div>
+    <div class="card-body">
+        <p class="text-muted mb-4">Answer a few questions to get personalized immigration advice for studying in Germany.</p>
+        <form id="immigrationForm">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label for="nationality" class="form-label">
+                        <i class="bi bi-globe me-1"></i>Your Nationality *
+                    </label>
+                    <input type="text" class="form-control" id="nationality" required placeholder="e.g., India, USA, etc.">
+                </div>
+                <div class="col-md-6">
+                    <label for="plannedLevel" class="form-label">
+                        <i class="bi bi-award me-1"></i>Planned Study Level *
+                    </label>
+                    <select class="form-select" id="plannedLevel" required>
+                        <option value="">Select...</option>
+                        <option value="Bachelor">Bachelor</option>
+                        <option value="Master">Master</option>
+                        <option value="PhD">PhD / Doctorate</option>
+                        <option value="Studienkolleg">Studienkolleg</option>
+                        <option value="Language course">Language Course</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                    <label for="hasAdmission" class="form-label">
+                        <i class="bi bi-file-check me-1"></i>Do you have an admission letter?
+                    </label>
+                    <select class="form-select" id="hasAdmission">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="scholarship" class="form-label">
+                        <i class="bi bi-trophy me-1"></i>Do you have a scholarship?
+                    </label>
+                    <select class="form-select" id="scholarship">
+                        <option value="false">No</option>
+                        <option value="true">Yes</option>
+                    </select>
+                </div>
+            </div>
+            <div class="row g-3 mt-2">
+                <div class="col-md-6">
+                    <label for="languageOfInstruction" class="form-label">
+                        <i class="bi bi-translate me-1"></i>Language of Instruction
+                    </label>
+                    <select class="form-select" id="languageOfInstruction">
+                        <option value="">Select...</option>
+                        <option value="English">English</option>
+                        <option value="German">German</option>
+                    </select>
+                </div>
+            </div>
+            <div class="mt-4">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    <i class="bi bi-check-circle me-2"></i> Get Immigration Advice
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div id="adviceResult" class="mt-4"></div>
+{% endblock %}
+

@@ -1,0 +1,1045 @@
+Study in Germany – AI Counselor
+
+Full Specification for Cursor
+
+1. Project Overview
+
+Name: Study in Germany – AI Counselor (MVP)
+
+Goal:
+Build a complete AI-based counselor that helps international students who want to study in Germany by:
+
+Discovering German universities and study programmes
+
+Understanding student visa and residence rules
+
+Letting students create a profile, upload educational documents
+
+Running a non-official feasibility assessment
+
+Providing a personal counseling experience with:
+
+Counseling sessions & history
+
+Personalized action plan / roadmap
+
+Programme & university suggestions
+
+Immigration-aware guidance
+
+Check-ins and progress tracking
+
+Using real data (APIs + scraping) and OpenAI for natural conversation.
+
+MVP: Germany only (universities, programmes, immigration).
+Later: extend to other countries using same architecture.
+
+2. Tech Stack
+
+Backend: Python 3, Flask
+
+Database: MongoDB
+
+Frontend: HTML, CSS, vanilla JS, Bootstrap 5
+
+AI: OpenAI (ChatCompletion + Embeddings) — user provides OPENAI_API_KEY
+
+Background Jobs: APScheduler (inside Flask) or cron
+
+File Storage (MVP): Local disk under /uploads/ (or Mongo GridFS later)
+
+3. Data Sources – APIs & Websites (Germany)
+3.1 Free API (Universities)
+
+Hipolabs University API (FREE, no key)
+
+Base URL: http://universities.hipolabs.com
+
+Example to fetch German universities:
+http://universities.hipolabs.com/search?country=Germany
+
+Usage:
+
+Daily sync of all German universities into MongoDB universities collection.
+
+All frontend university search pulls from Mongo (not directly from Hipolabs).
+
+3.2 Programme Data – Websites to Scrape
+
+Before scraping, always check each site’s robots.txt and Terms of Use.
+If commercial use is disallowed, treat scraping as internal or switch to manual CSV uploads via admin.
+
+Targets (Germany-focused):
+
+Hochschulkompass (Higher Education Compass)
+
+Degree programmes overview:
+https://www.hochschulkompass.de/en/degree-programmes.html
+
+Study-in-Germany search:
+https://www.hochschulkompass.de/en/degree-programmes/study-in-germany-search.html
+
+Higher education institutions:
+https://www.hochschulkompass.de/en/higher-education-institutions.html
+
+TXT list of all institutions (for personal use):
+https://hs-kompass.de/kompass/xml/download/hs_liste.txt
+
+DAAD / Study-in-Germany
+
+All degree programmes:
+https://www.daad.de/en/studying-in-germany/universities/all-degree-programmes/
+
+International Programmes:
+https://www2.daad.de/deutschland/studienangebote/international-programmes/en/
+
+Programme finder:
+https://www.study-in-germany.com/en/plan-your-studies/study-options/programme/
+
+MyGuide (DAAD Course Finder)
+
+https://www.myguide.de/en/
+
+Usage:
+
+Scrape programme entries for Germany:
+
+title
+
+degree type (Bachelor, Master, PhD, etc.)
+
+language(s) of instruction
+
+university name
+
+city
+
+tuition fee (if visible)
+
+duration
+
+application deadlines (if visible)
+
+source URL
+
+Store in programmes collection.
+
+3.3 Immigration / Visa / Residence – Official Info Sites
+
+Use curated data (semi-manual) plus optional light monitors. Primary sources:
+
+Auswärtiges Amt (German Federal Foreign Office)
+
+General info about student visas and blocked account requirements.
+
+BAMF – Federal Office for Migration and Refugees
+
+“Studying in Germany” pages: residence permits for students, work while studying, after graduation.
+
+Make it in Germany (Official portal)
+
+Study visa information:
+https://www.make-it-in-germany.com/en/visa-residence/types/studying
+
+Study in Germany – Visa Info (DAAD)
+
+Visa requirements overview:
+https://www.study-in-germany.com/en/plan-your-studies/requirements/visa/
+
+Local Authority Example
+
+Hamburg Welcome Center student residence permit page:
+https://welcome.hamburg.com/entry-and-residence/residence-permit/students-17520
+
+Usage:
+
+Create structured immigration rules in Mongo (immigration_rules collection) for:
+
+National Visa – Study
+
+Residence Permit for Study
+
+Post-study job search / residence
+
+Store:
+
+min funds per month/year (blocked account)
+
+typical work hour limits
+
+duration
+
+extension rules
+
+key documents
+
+official source URLs
+
+Optional: script that periodically checks these pages to see if key numeric values changed (flag for admin).
+
+3.4 Optional: Visa API (Free Tier)
+
+Later you may add a visa API (e.g. Travel Visa API / Travel Buddy) with a free tier to answer "Do I need a visa?" by nationality.
+
+MVP can work without this, relying solely on curated official sources.
+
+4. SRS – Software Requirements Specification
+4.1 Purpose
+
+Build a web-based, AI-powered study counselor for Germany that:
+
+Uses real-world data about universities, programmes, and immigration.
+
+Lets students maintain a profile, upload educational documents, and get a readiness assessment.
+
+Provides a counseling chat experience that:
+
+Tracks sessions
+
+Builds and updates a personal action plan
+
+Suggests programmes and universities
+
+Explains immigration implications
+
+Remembers progress over time.
+
+4.2 Scope (MVP: Germany)
+
+Search and view German universities.
+
+Search and view German study programmes.
+
+Show structured immigration info for study in Germany.
+
+Student profile with background & preferences.
+
+Document upload (educational documents only).
+
+Assessment: non-official “Study in Germany feasibility”.
+
+AI Counselor:
+
+Counseling sessions & history
+
+Personalized action plan
+
+Programme recommendations
+
+Immigration-aware responses
+
+Admin panel:
+
+Trigger scrapers
+
+Manage immigration rules
+
+See job logs / basic stats.
+
+4.3 User Classes
+
+Visitor / Anonymous User
+
+Can search/view universities, programmes, immigration info.
+
+Can create a temporary profile (tied to session ID).
+
+Can upload documents (within limits).
+
+Can run assessment and use counselor (rate-limited).
+
+Registered User (optional later)
+
+Same as visitor, but with persistent login and stable user_id.
+
+Admin
+
+Access admin dashboard.
+
+Trigger scraping and synchronisation.
+
+Edit immigration rules.
+
+Monitor logs and data quality.
+
+4.4 Functional Requirements
+FR1 – University Search
+
+FR1.1: System imports German universities from Hipolabs API daily into universities.
+
+FR1.2: GET /api/universities:
+
+query params: q (name), state, page, limit.
+
+FR1.3: University list page with search box & state filter.
+
+FR1.4: Show name, state/province, website, with link to detail view.
+
+FR2 – University Detail
+
+FR2.1: GET /api/universities/<id> returns one record.
+
+FR2.2: Detail page shows:
+
+name, domains, web_pages
+
+state / city (if available)
+
+AI-generated short description based on stored data.
+
+FR3 – Programme Search
+
+FR3.1: programmes collection with fields (at least):
+
+title, degree_type, language[], university_name, university_id, city, tuition_fee_eur_per_semester, duration_semesters, application_deadline, source, source_url, last_seen_at.
+
+FR3.2: Scrapers run daily/weekly against DAAD / Hochschulkompass / Study-in-Germany (Germany-only).
+
+FR3.3: GET /api/programmes:
+
+filters: q, degree_type, language, university_id, city, page, limit.
+
+FR3.4: Programmes page with filters and card/list view.
+
+FR4 – Immigration Helper (Study Visa / Residence)
+
+FR4.1: immigration_rules collection contains structured rules for:
+
+National Study Visa (long-term / D-Study)
+
+Residence permit for study
+
+Post-study residence/job search
+
+FR4.2: Each entry stores:
+
+country_code (always DE in MVP)
+
+visa_type / category_code
+
+min_funds_month_eur, min_funds_year_eur
+
+work_hours_per_week, max_full_days_per_year
+
+duration_initial_months, extension_rules
+
+key_documents[]
+
+source_urls[]
+
+last_verified_at
+
+FR4.3: POST /api/immigration/advice:
+
+request body: nationality, planned_level, has_admission_letter, scholarship, possibly language_of_instruction.
+
+response: recommended visa type(s) and structured text summary.
+
+FR4.4: Immigration wizard page:
+
+Step-by-step questions, sends data to /api/immigration/advice.
+
+FR4.5: All immigration content must display disclaimer:
+
+“This is informational only and not legal advice. Always confirm with official embassies/authorities.”
+
+FR5 – Student Profile
+
+FR5.1: student_profiles collection per user/session.
+
+FR5.2: Profile fields:
+
+name (optional)
+
+nationality, country_of_residence
+
+highest_education_level (High School, Bachelor, Master, etc.)
+
+highest_education_field
+
+gpa_or_marks (free text)
+
+english_level (IELTS/TOEFL/CEFR/free text)
+
+german_level (if any)
+
+desired_study_level (Bachelor/Master/PhD/Language course/Studienkolleg)
+
+desired_field
+
+preferred_cities[]
+
+timestamps
+
+FR5.3: GET /api/profile and POST /api/profile manage profile.
+
+FR5.4: /profile page to create/edit profile.
+
+FR6 – Document Upload
+
+FR6.1: Allowed document types:
+
+transcript, degree certificate, language_certificate, CV, SOP, other academic documents.
+
+FR6.2: Disallow or strongly warn against:
+
+passports, ID cards, bank statements, highly sensitive documents.
+
+FR6.3: File constraints:
+
+Allowed extensions: .pdf, .jpg, .jpeg, .png, .docx.
+
+Max file size per file (e.g. 10 MB).
+
+Max number of files per user (e.g. 10).
+
+FR6.4: documents collection stores:
+
+user_id
+
+document_type
+
+original_filename, stored_filename
+
+content_type, size_bytes
+
+storage_path or gridfs_id
+
+has_text_extracted (bool)
+
+extracted_text_snippet (short)
+
+uploaded_at
+
+FR6.5: APIs:
+
+POST /api/documents (multipart/form-data).
+
+GET /api/documents – list documents for current user.
+
+DELETE /api/documents/<id> – delete user’s own document.
+
+FR6.6: /profile page shows upload form + list + delete option.
+
+FR6.7: Show privacy warning near upload component.
+
+FR7 – Feasibility Assessment
+
+FR7.1: assessments collection stores each assessment:
+
+user_id
+
+profile_snapshot (copy of student_profiles at assessment time)
+
+documents_summary (presence flags: has_transcript, etc.)
+
+country_target (DE)
+
+overall_feasibility (High | Medium | Needs Preparation)
+
+suggested_entry_path (e.g. “Direct Master”, “Bachelor first”, “Studienkolleg”, “Language course then degree”)
+
+key_gaps[]
+
+recommended_actions[]
+
+ai_explanation (human-readable text)
+
+created_at
+
+FR7.2: POST /api/assessments/run:
+
+Loads current profile + documents.
+
+Runs rule-based logic to fill fields above.
+
+Optionally calls OpenAI to generate ai_explanation.
+
+Stores record and returns it.
+
+FR7.3: GET /api/assessments/latest returns latest assessment.
+
+FR7.4: /profile page shows last assessment + “Run Assessment” button.
+
+FR7.5: Every assessment output includes:
+
+Disclaimer: “This assessment is informational only and not an admission, scholarship, or visa decision.”
+
+FR8 – AI Assistant (RAG)
+
+FR8.1: AI assistant endpoint: POST /api/chat.
+
+FR8.2: It uses RAG over:
+
+universities, programmes, immigration_rules, and optionally assessments for the current user.
+
+FR8.3: It returns:
+
+answer
+
+sources (list of objects with title + url).
+
+FR8.4: For immigration questions, AI must:
+
+Use only immigration data from DB as authoritative context.
+
+Add legal disclaimer in answer.
+
+FR9 – Counseling Sessions & History
+
+FR9.1: counseling_sessions collection:
+
+user_id
+
+title
+
+purpose (initial_planning, programme_shortlist, visa_prep, etc.)
+
+created_at, updated_at
+
+summary
+
+FR9.2: counseling_messages collection:
+
+session_id
+
+user_id
+
+sender (user | assistant)
+
+message_type (e.g. question, answer, plan_update, check_in)
+
+message_text
+
+created_at
+
+FR9.3: APIs:
+
+POST /api/counselor/sessions – create new session.
+
+GET /api/counselor/sessions – list sessions.
+
+GET /api/counselor/sessions/<id> – session metadata.
+
+GET /api/counselor/sessions/<id>/messages – messages list.
+
+POST /api/counselor/sessions/<id>/message – user sends message, AI responds, both stored.
+
+FR9.4: assistant.html (or counselor.html) shows:
+
+Session dropdown.
+
+Chat window.
+
+Ability to start new session.
+
+FR10 – Action Plan / Counseling Plan
+
+FR10.1: counseling_plans (or action_plans) collection:
+
+user_id, session_id
+
+country_target (DE)
+
+main_goal (e.g. “Master in Data Science in Germany, Winter 2027”)
+
+target_start_term
+
+preferred_language_of_study
+
+plan_steps[] – each step has step_id, title, status, due_date, notes.
+
+last_updated_at
+
+FR10.2: AI counselor uses profile + assessment + user goals to create initial plan.
+
+FR10.3: User can update step status (done / in_progress).
+
+FR10.4: APIs:
+
+GET /api/counselor/plan
+
+POST /api/counselor/plan/update (add/update/remove steps).
+
+FR10.5: Sidebar in counselor UI shows plan steps and their statuses.
+
+FR11 – Personalized Recommendations (Programmes & Universities)
+
+FR11.1: AI counselor suggests programmes based on:
+
+desired field, level, language, location preferences.
+
+FR11.2: Recommendations drawn strictly from programmes (and related universities) in the DB.
+
+FR11.3: User can save programmes to favorites / shortlisted_programmes.
+
+FR11.4: Counselor references shortlists in later sessions.
+
+FR12 – Intake Flow & Check-ins
+
+FR12.1: Provide a multi-step intake wizard (could be part of /profile):
+
+Step 1: Background.
+
+Step 2: Goals.
+
+Step 3: Language & finances (no detailed financial docs).
+
+Step 4: Document upload.
+
+FR12.2: Intake seeds:
+
+Profile
+
+First assessment
+
+First action plan.
+
+FR12.3: Check-ins:
+
+System stores next_check_in_date (in plan).
+
+When user returns, counselor references pending steps and due dates.
+
+FR13 – Admin Panel
+
+FR13.1: Admin auth (basic username/password from env or DB).
+
+FR13.2: /admin dashboard:
+
+Buttons:
+
+“Sync Universities from Hipolabs”
+
+“Run Programme Scraper”
+
+Optionally “Check Immigration Numbers”
+
+Display job logs from jobs_log collection.
+
+CRUD interface for immigration_rules.
+
+4.5 Non-Functional Requirements
+
+Performance: Common API calls should return in < 1 second (with Mongo indexes).
+
+Security:
+
+Admin APIs behind auth.
+
+Uploaded files accessible only for the owner.
+
+Store secrets in environment variables.
+
+Reliability:
+
+If scrapers or external sites fail, user APIs fall back to last cached data.
+
+Legal & Privacy:
+
+Respect robots.txt and site terms.
+
+Clear disclaimers on immigration and assessments.
+
+Strong warnings about not uploading sensitive ID/financial documents.
+
+Allow users to delete their documents and assessments.
+
+5. FSD – Functional / Technical Design
+5.1 Directory Structure
+project/
+  app.py
+  config.py
+  requirements.txt
+  /api
+    __init__.py
+    universities.py
+    programmes.py
+    immigration.py
+    profile.py
+    documents.py
+    assessments.py
+    chat.py
+    counselor.py
+    admin.py
+  /models
+    __init__.py
+    mongo.py
+  /scrapers
+    __init__.py
+    hipolabs_universities.py
+    daad_programmes.py
+    immigration_monitor.py
+  /services
+    __init__.py
+    assessment.py
+    embeddings.py
+    counselor.py
+  /jobs
+    scheduler.py
+  /templates
+    base.html
+    index.html
+    universities.html
+    university_detail.html
+    programmes.html
+    immigration.html
+    profile.html
+    counselor.html
+    admin.html
+  /static
+    /css
+    /js
+    /img
+  /uploads
+  /tests
+
+5.2 Mongo Collections (Schemas)
+
+Include the previously defined documents:
+
+universities
+
+programmes
+
+immigration_rules
+
+student_profiles
+
+documents
+
+assessments
+
+counseling_sessions
+
+counseling_messages
+
+counseling_plans
+
+favorites / shortlisted_programmes
+
+jobs_log
+
+embeddings (if needed)
+
+(Examples already given above.)
+
+5.3 Key Backend Components
+
+models/mongo.py
+
+Provide a get_db() function that returns a Mongo client/DB instance.
+
+Handle connection via env variable MONGO_URI.
+
+jobs/scheduler.py
+
+Setup APScheduler (or similar) tasks:
+
+daily: sync_german_universities()
+
+daily/weekly: scrape_german_programmes()
+
+optional monthly: check_immigration_numbers()
+
+Scrapers (scrapers/*)
+
+hipolabs_universities.py:
+
+sync_german_universities(): fetch from Hipolabs, upsert into universities.
+
+daad_programmes.py:
+
+scrape_german_programmes(): fetch programme lists from DAAD / Hochschulkompass / Study-in-Germany and upsert into programmes.
+
+immigration_monitor.py:
+
+Optional: fetch official pages, detect changes in numeric fields, log differences.
+
+Services
+
+services/assessment.py:
+
+run_assessment(profile, documents, immigration_rules_de):
+
+implement rule-based feasibility logic.
+
+call OpenAI (optional) to generate explanation.
+
+services/embeddings.py:
+
+Create and maintain embeddings for documents (universities, programmes, immigration rules).
+
+Provide functions: embed_text, search_similar.
+
+services/counselor.py:
+
+Higher-level logic for counselor:
+
+load profile, assessment, plan, session history
+
+build system prompt & context
+
+call OpenAI with RAG
+
+update session messages & plan as needed.
+
+5.4 Frontend Pages
+
+base.html
+
+Navbar: Home, Universities, Programmes, Immigration, Profile, Counselor, (Admin when logged in).
+
+Footer with:
+
+Immigration disclaimer.
+
+Privacy note about document uploads.
+
+index.html
+
+Hero section:
+
+“Plan your studies in Germany with an AI counselor.”
+
+Quick search for universities/programmes.
+
+universities.html
+
+Search bar, state filter.
+
+Table of universities loaded from /api/universities.
+
+university_detail.html
+
+University info.
+
+List of related programmes.
+
+programmes.html
+
+Filters: field, degree, language, city, university.
+
+Display cards loaded from /api/programmes.
+
+immigration.html
+
+Wizard form for /api/immigration/advice.
+
+Display structured results with callouts.
+
+profile.html
+
+Profile form with fields from student_profiles.
+
+Document upload section.
+
+Display documents list with delete options.
+
+Assessment card: “Run Assessment” button, results from /api/assessments/latest.
+
+counselor.html
+
+Session dropdown + “New Session” button.
+
+Chat window (messages from /api/counselor/sessions/<id>/messages).
+
+Input box to send message (POST to /api/counselor/sessions/<id>/message).
+
+Sidebar with:
+
+Profile summary
+
+Latest assessment summary
+
+Action plan steps (updateable)
+
+admin.html
+
+Buttons to trigger jobs.
+
+Display job logs.
+
+Table/editor for immigration_rules.
+
+6. Cursor / Agent Instructions
+
+You can use these as global / agent-specific instructions inside Cursor.
+
+6.1 Global Project Instruction
+
+You are an AI pair programmer building “Study in Germany – AI Counselor”.
+
+Tech stack
+
+Backend: Python 3, Flask
+
+Database: MongoDB
+
+Frontend: HTML, CSS, vanilla JS, Bootstrap 5
+
+Background jobs: APScheduler or cron
+
+AI: OpenAI (ChatCompletion + Embeddings) using OPENAI_API_KEY
+
+Requirements
+
+Follow docs/spec.md as the source of truth (this document).
+
+Use only free data sources:
+
+Hipolabs University API (http://universities.hipolabs.com)
+
+Scraping DAAD / Hochschulkompass / Study-in-Germany / MyGuide (Germany-only)
+
+Curated immigration rules from Auswärtiges Amt, BAMF, Make-it-in-Germany, Study-in-Germany.
+
+Implement:
+
+University & programme search.
+
+Immigration helper.
+
+Student profile & document uploads.
+
+Feasibility assessment.
+
+Counselor sessions, messages, action plan.
+
+AI chat & counselor with RAG.
+
+Use env vars for all secrets (Mongo URI, OpenAI key).
+
+Store uploads under /uploads/<user_id>/ and restrict access to owners.
+
+Always show:
+
+Immigration disclaimer: “Informational only, not legal advice.”
+
+Upload warning: “Do not upload passports, ID cards or bank statements.”
+
+Write clean, commented, production-ready code.
+
+6.2 Backend / Flask Agent
+
+Role: Implement Flask backend and REST APIs.
+
+Implement:
+
+app.py and config.py.
+
+Mongo connection in models/mongo.py.
+
+Blueprints in api/:
+
+universities.py – /api/universities, /api/universities/<id>, /api/admin/universities/sync.
+
+programmes.py – /api/programmes, /api/programmes/<id>, /api/admin/programmes/scrape.
+
+immigration.py – /api/immigration/rules, /api/immigration/advice.
+
+profile.py – /api/profile.
+
+documents.py – /api/documents (POST, GET, DELETE).
+
+assessments.py – /api/assessments/run, /api/assessments/latest.
+
+chat.py – /api/chat.
+
+counselor.py – session + message endpoints.
+
+admin.py – admin auth, job triggers.
+
+jobs/scheduler.py – schedule daily/weekly scrapers.
+
+Integrate services/assessment.py, services/embeddings.py, services/counselor.py.
+
+Add error handling, logging, and basic unit tests.
+
+Constraints:
+
+Use only the listed free data sources.
+
+Handle network errors gracefully.
+
+Keep endpoints consistent with schemas in spec.
+
+6.3 Scraper Agent
+
+Role: Implement scraping logic under scrapers/.
+
+hipolabs_universities.py:
+
+sync_german_universities(): call Hipolabs API, upsert into universities.
+
+daad_programmes.py:
+
+scrape_german_programmes(): use requests + BeautifulSoup.
+
+Target DAAD / Hochschulkompass / Study-in-Germany / MyGuide pages for Germany programmes.
+
+Extract key fields and upsert into programmes.
+
+immigration_monitor.py (optional):
+
+Fetch official immigration pages and compare numeric values to immigration_rules.
+
+If changed, log a warning or flag for admin.
+
+Guidelines:
+
+Use a custom User-Agent.
+
+Add delays between requests.
+
+Keep selectors & URLs configurable.
+
+Scrapers must be idempotent and handle network failures.
+
+6.4 Frontend Agent (Bootstrap UI)
+
+Role: Implement responsive frontend pages using HTML, Bootstrap, vanilla JS.
+
+base.html: layout, navbar, footer with disclaimers.
+
+index.html: hero + quick search.
+
+universities.html, university_detail.html, programmes.html, immigration.html.
+
+profile.html: profile form, document upload, last assessment display.
+
+counselor.html: counseling chat, session selector, sidebar with plan & profile summary.
+
+admin.html: buttons for scrapers, job logs, immigration_rules editor.
+
+Use fetch() for AJAX calls to backend APIs and update DOM without page reloads.
+
+6.5 AI / RAG / Counselor Agent
+
+Role: Implement RAG and counselor logic.
+
+In services/embeddings.py:
+
+Create functions to embed text and search similar documents.
+
+Index immigration rules, universities, programmes.
+
+In services/counselor.py:
+
+Compose system prompts that define the AI as a Study in Germany counselor.
+
+Load context (profile, assessment, action plan, relevant programmes and immigration rules, recent session messages).
+
+Call OpenAI ChatCompletion.
+
+Ensure responses:
+
+Are grounded in provided data (no hallucinated universities).
+
+Include sources (names/URLs).
+
+Include immigration disclaimer when relevant.
+
+Respect user privacy and do not echo raw document text.
+
+/api/chat can provide a simpler Q&A interface; /api/counselor/sessions/<id>/message uses full counselor context.

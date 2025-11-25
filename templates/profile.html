@@ -1,0 +1,181 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Study in Germany{% endblock %}
+
+{% block extra_head %}
+<script src="{{ url_for('static', filename='js/profile.js') }}" defer></script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex align-items-center mb-4">
+    <div class="p-3 rounded-circle me-3" style="background: rgba(102, 126, 234, 0.2);">
+        <i class="bi bi-person-circle fs-2" style="color: var(--accent-primary);"></i>
+    </div>
+    <div>
+        <h1 class="mb-0">My Profile</h1>
+        <p class="text-muted mb-0">Manage your profile, documents, and assessments</p>
+    </div>
+</div>
+
+<ul class="nav nav-tabs mb-4" id="profileTabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button">
+            <i class="bi bi-person me-2"></i>Profile Information
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="documents-tab" data-bs-toggle="tab" data-bs-target="#documents" type="button">
+            <i class="bi bi-folder me-2"></i>Documents
+        </button>
+    </li>
+    <li class="nav-item" role="presentation">
+        <button class="nav-link" id="assessment-tab" data-bs-toggle="tab" data-bs-target="#assessment" type="button">
+            <i class="bi bi-graph-up me-2"></i>Assessment
+        </button>
+    </li>
+</ul>
+
+<div class="tab-content" id="profileTabContent">
+    <!-- Profile Tab -->
+    <div class="tab-pane fade show active" id="profile" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-pencil-square me-2"></i>Edit Profile Information</h5>
+            </div>
+            <div class="card-body">
+                <form id="profileForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="name" class="form-label">Name (Optional)</label>
+                            <input type="text" class="form-control" id="name">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nationality" class="form-label">Nationality *</label>
+                            <input type="text" class="form-control" id="nationality" required>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="countryOfResidence" class="form-label">Country of Residence *</label>
+                            <input type="text" class="form-control" id="countryOfResidence" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="highestEducation" class="form-label">Highest Education Level *</label>
+                            <select class="form-select" id="highestEducation" required>
+                                <option value="">Select...</option>
+                                <option value="High School">High School</option>
+                                <option value="Bachelor">Bachelor</option>
+                                <option value="Master">Master</option>
+                                <option value="PhD">PhD</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="educationField" class="form-label">Field of Study</label>
+                        <input type="text" class="form-control" id="educationField" placeholder="e.g., Computer Science">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="gpa" class="form-label">GPA / Marks</label>
+                            <input type="text" class="form-control" id="gpa" placeholder="e.g., 3.5 or 85%">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="englishLevel" class="form-label">English Level</label>
+                            <input type="text" class="form-control" id="englishLevel" placeholder="e.g., IELTS 7.0 or C1">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="germanLevel" class="form-label">German Level</label>
+                        <input type="text" class="form-control" id="germanLevel" placeholder="e.g., B2 or TestDaF">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="desiredLevel" class="form-label">Desired Study Level *</label>
+                            <select class="form-select" id="desiredLevel" required>
+                                <option value="">Select...</option>
+                                <option value="Bachelor">Bachelor</option>
+                                <option value="Master">Master</option>
+                                <option value="PhD">PhD</option>
+                                <option value="Studienkolleg">Studienkolleg</option>
+                                <option value="Language course">Language Course</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="desiredField" class="form-label">Desired Field</label>
+                            <input type="text" class="form-control" id="desiredField">
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label for="preferredCities" class="form-label">Preferred Cities (comma-separated)</label>
+                        <input type="text" class="form-control" id="preferredCities" placeholder="e.g., Berlin, Munich, Hamburg">
+                    </div>
+                    <div class="d-flex justify-content-end mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="bi bi-save me-2"></i> Save Profile
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Documents Tab -->
+    <div class="tab-pane fade" id="documents" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-folder me-2"></i>Document Management</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong><i class="bi bi-exclamation-triangle me-2"></i>Privacy Warning:</strong> 
+                    Do not upload passports, ID cards, or bank statements. Only upload educational documents.
+                </div>
+                <h5 class="mb-3"><i class="bi bi-cloud-upload me-2"></i>Upload Document</h5>
+                <form id="documentUploadForm">
+                    <div class="mb-3">
+                        <label for="documentType" class="form-label">Document Type</label>
+                        <select class="form-select" id="documentType" required>
+                            <option value="">Select...</option>
+                            <option value="transcript">Transcript</option>
+                            <option value="degree_certificate">Degree Certificate</option>
+                            <option value="language_certificate">Language Certificate</option>
+                            <option value="CV">CV / Resume</option>
+                            <option value="SOP">Statement of Purpose</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="documentFile" class="form-label">File (PDF, JPG, PNG, DOCX - Max 10MB)</label>
+                        <input type="file" class="form-control" id="documentFile" required accept=".pdf,.jpg,.jpeg,.png,.docx">
+                    </div>
+                    <div class="d-flex justify-content-end">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload me-2"></i> Upload Document
+                        </button>
+                    </div>
+                </form>
+                <hr class="my-4">
+                <h5 class="mb-3"><i class="bi bi-files me-2"></i>My Documents</h5>
+                <div id="documentsList"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Assessment Tab -->
+    <div class="tab-pane fade" id="assessment" role="tabpanel">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="bi bi-graph-up me-2"></i>Feasibility Assessment</h5>
+            </div>
+            <div class="card-body">
+                <p class="mb-4">Run an assessment to see how ready you are to study in Germany based on your profile and documents.</p>
+                <button class="btn btn-primary btn-lg" onclick="runAssessment()">
+                    <i class="bi bi-graph-up-arrow me-2"></i> Run Assessment
+                </button>
+                <div id="assessmentResult" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
