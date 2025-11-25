@@ -36,14 +36,20 @@ def sync_german_universities():
         
         for uni_data in universities_data:
             try:
-                # Normalize data
+                # Normalize data - handle None values before calling strip()
+                name = uni_data.get('name') or ''
+                name = name.strip() if name else ''
+                
+                state_province = uni_data.get('state-province') or ''
+                state_province = state_province.strip() if state_province else None
+                
                 university = {
-                    'name': uni_data.get('name', '').strip(),
+                    'name': name,
                     'alpha_two_code': uni_data.get('alpha_two_code', 'DE'),
                     'domains': uni_data.get('domains', []),
                     'web_pages': uni_data.get('web_pages', []),
                     'country': uni_data.get('country', 'Germany'),
-                    'state-province': uni_data.get('state-province', '').strip() or None,
+                    'state-province': state_province,
                     'last_synced_at': datetime.utcnow(),
                 }
                 
